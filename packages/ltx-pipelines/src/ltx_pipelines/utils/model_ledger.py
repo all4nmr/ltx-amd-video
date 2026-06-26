@@ -33,6 +33,7 @@ from ltx_core.model.video_vae import (
     VideoEncoderConfigurator,
 )
 from ltx_core.text_encoders.gemma import (
+from helpers import device, sync_device, cleanup_memory
     AV_GEMMA_TEXT_ENCODER_KEY_OPS,
     AVGemmaTextEncoderModel,
     AVGemmaTextEncoderModelConfigurator,
@@ -55,12 +56,12 @@ class ModelLedger:
         Models are **not cached**. Each call to a model method creates a new instance.
         Callers are responsible for storing references to models they wish to reuse
         and for freeing GPU memory (e.g. by deleting references and calling
-        ``torch.cuda.empty_cache()``).
+        ``helpers.cleanup_memory()``).
     ### Constructor parameters
     dtype:
         Torch dtype used when constructing all models (e.g. ``torch.bfloat16``).
     device:
-        Target device to which models are moved after construction (e.g. ``torch.device("cuda")``).
+        Target device to which models are moved after construction (e.g. ``getattr(helpers, 'device', torch.device('cuda' if torch.cuda.is_available() else 'cpu'))``).
     checkpoint_path:
         Path to a checkpoint directory or file containing the core model weights
         (transformer, video VAE, audio VAE, text encoder, vocoder). If ``None``, the

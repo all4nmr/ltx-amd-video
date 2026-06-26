@@ -11,6 +11,7 @@ from ltx_core.model.audio_vae.model_configurator import (
 )
 from ltx_core.model.audio_vae.ops import AudioProcessor
 from ltx_core.model.audio_vae.vocoder import Vocoder
+from helpers import device, sync_device, cleanup_memory
 
 __all__ = [
     "AUDIO_VAE_DECODER_COMFY_KEYS_FILTER",

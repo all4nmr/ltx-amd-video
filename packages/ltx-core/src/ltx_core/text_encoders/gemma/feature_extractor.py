@@ -1,6 +1,7 @@
 import torch
 
 from ltx_core.model.model_protocol import ModelConfigurator
+from helpers import device, sync_device, cleanup_memory
 
 
 class GemmaFeaturesExtractorProjLinear(torch.nn.Module, ModelConfigurator["GemmaFeaturesExtractorProjLinear"]):

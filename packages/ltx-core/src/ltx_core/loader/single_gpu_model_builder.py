@@ -23,6 +23,7 @@ logger: logging.Logger = logging.getLogger(__name__)
 
 from loguru import logger
 from accelerate import dispatch_model, infer_auto_device_map
+from helpers import device, sync_device, cleanup_memory
 
 
 @dataclass(frozen=True)
@@ -78,7 +79,7 @@ class SingleGPUModelBuilder(Generic[ModelType], ModelBuilderProtocol[ModelType],
             dtype: torch.dtype | None = None,
             max_memory: dict[int | str, str] | None = None
     ) -> ModelType:
-        target_device = torch.device("cuda") if device is None else device
+        target_device = getattr(helpers, 'device', torch.device('cuda' if torch.cuda.is_available() else 'cpu')) if device is None else device
         config = self.model_config()
         meta_model = self.meta_model(config, self.module_ops)
         model_paths = self.model_path if isinstance(self.model_path, tuple) else [self.model_path]

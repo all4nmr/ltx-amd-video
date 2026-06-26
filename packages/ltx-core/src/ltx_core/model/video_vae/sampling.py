@@ -7,6 +7,7 @@ from torch import nn
 
 from .convolution import make_conv_nd
 from .enums import PaddingModeType
+from helpers import device, sync_device, cleanup_memory
 
 
 class SpaceToDepthDownsample(nn.Module):

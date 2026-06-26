@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import NamedTuple
 
 import torch
+from helpers import device, sync_device, cleanup_memory
 
 
 class VideoPixelShape(NamedTuple):

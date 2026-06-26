@@ -10,6 +10,7 @@ import av
 import numpy as np
 import torch
 from torch import Tensor
+from helpers import device, sync_device, cleanup_memory
 
 
 def get_video_frame_count(video_path: str | Path) -> int:

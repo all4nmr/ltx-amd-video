@@ -7,6 +7,7 @@ import torch.nn.functional as F
 from torch import nn
 
 from ltx_core.model.audio_vae.resnet import LRELU_SLOPE, ResBlock1, ResBlock2
+from helpers import device, sync_device, cleanup_memory
 
 
 class Vocoder(torch.nn.Module):

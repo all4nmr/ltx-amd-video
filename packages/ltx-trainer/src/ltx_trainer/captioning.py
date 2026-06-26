@@ -16,6 +16,7 @@ from enum import Enum
 from pathlib import Path
 
 import torch
+from helpers import device, sync_device, cleanup_memory
 
 # Instruction for audio-visual captioning (default) - includes speech transcription and sounds
 DEFAULT_CAPTION_INSTRUCTION = """\
@@ -137,7 +138,7 @@ class QwenOmniCaptioner(MediaCaptioningModel):
             use_8bit: Whether to use 8-bit quantization for reduced memory usage
             instruction: Custom instruction prompt. If None, uses the default instruction
         """
-        self.device = torch.device(device or ("cuda" if torch.cuda.is_available() else "cpu"))
+        self.device = torch.device(device or ("cuda" if helpers.is_directml(getattr(helpers, 'device', None)) or torch.cuda.is_available() else "cpu"))
         self.instruction = instruction
         self._load_model(use_8bit=use_8bit)
 

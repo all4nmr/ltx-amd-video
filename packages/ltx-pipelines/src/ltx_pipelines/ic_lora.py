@@ -33,6 +33,7 @@ from ltx_pipelines.utils.helpers import (
 )
 from ltx_pipelines.utils.media_io import encode_video, load_video_conditioning
 from ltx_pipelines.utils.types import PipelineComponents
+from helpers import device, sync_device, cleanup_memory
 
 device = get_device()
 
@@ -110,7 +111,7 @@ class ICLoraPipeline:
             )
         video_context, audio_context = encode_text(text_encoder, prompts=[prompt])[0]
 
-        torch.cuda.synchronize()
+        helpers.sync_device()
         del text_encoder
         cleanup_memory()
 
@@ -161,7 +162,7 @@ class ICLoraPipeline:
             device=self.device,
         )
 
-        torch.cuda.synchronize()
+        helpers.sync_device()
         del transformer
         cleanup_memory()
 
@@ -172,7 +173,7 @@ class ICLoraPipeline:
             upsampler=self.stage_2_model_ledger.spatial_upsampler(),
         )
 
-        torch.cuda.synchronize()
+        helpers.sync_device()
         cleanup_memory()
 
         transformer = self.stage_2_model_ledger.transformer()
@@ -218,7 +219,7 @@ class ICLoraPipeline:
             initial_audio_latent=audio_state.latent,
         )
 
-        torch.cuda.synchronize()
+        helpers.sync_device()
         del transformer
         del video_encoder
         cleanup_memory()

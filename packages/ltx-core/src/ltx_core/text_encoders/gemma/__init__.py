@@ -12,6 +12,7 @@ from ltx_core.text_encoders.gemma.encoders.base_encoder import (
     module_ops_from_gemma_root,
 )
 from ltx_core.text_encoders.gemma.encoders.video_only_encoder import (
+from helpers import device, sync_device, cleanup_memory
     VideoGemmaEncoderOutput,
     VideoGemmaTextEncoderModel,
     VideoGemmaTextEncoderModelConfigurator,

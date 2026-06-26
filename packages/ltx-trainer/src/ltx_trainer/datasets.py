@@ -6,6 +6,7 @@ from torch import Tensor
 from torch.utils.data import Dataset
 
 from ltx_trainer import logger
+from helpers import device, sync_device, cleanup_memory
 
 # Constants for precomputed data directories
 PRECOMPUTED_DIR_NAME = ".precomputed"

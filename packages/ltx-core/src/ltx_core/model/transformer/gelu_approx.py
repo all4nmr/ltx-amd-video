@@ -1,4 +1,5 @@
 import torch
+from helpers import device, sync_device, cleanup_memory
 
 
 class GELUApprox(torch.nn.Module):

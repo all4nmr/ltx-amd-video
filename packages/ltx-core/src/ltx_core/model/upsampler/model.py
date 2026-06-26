@@ -5,6 +5,7 @@ from ltx_core.model.upsampler.pixel_shuffle import PixelShuffleND
 from ltx_core.model.upsampler.res_block import ResBlock
 from ltx_core.model.upsampler.spatial_rational_resampler import SpatialRationalResampler
 from ltx_core.model.video_vae import VideoEncoder
+from helpers import device, sync_device, cleanup_memory
 
 
 class LatentUpsampler(torch.nn.Module):

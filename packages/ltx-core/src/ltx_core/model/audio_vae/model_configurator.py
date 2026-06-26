@@ -5,6 +5,7 @@ from ltx_core.model.audio_vae.causality_axis import CausalityAxis
 from ltx_core.model.audio_vae.vocoder import Vocoder
 from ltx_core.model.common.normalization import NormType
 from ltx_core.model.model_protocol import ModelConfigurator
+from helpers import device, sync_device, cleanup_memory
 
 
 class VocoderConfigurator(ModelConfigurator[Vocoder]):

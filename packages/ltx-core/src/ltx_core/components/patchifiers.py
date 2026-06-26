@@ -6,6 +6,7 @@ import torch
 
 from ltx_core.components.protocols import Patchifier
 from ltx_core.types import AudioLatentShape, SpatioTemporalScaleFactors, VideoLatentShape
+from helpers import device, sync_device, cleanup_memory
 
 
 class VideoLatentPatchifier(Patchifier):

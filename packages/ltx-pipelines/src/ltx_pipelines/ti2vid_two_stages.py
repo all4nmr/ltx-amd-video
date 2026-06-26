@@ -37,6 +37,7 @@ from ltx_pipelines.utils.media_io import encode_video
 from ltx_pipelines.utils.types import PipelineComponents
 
 from line_profiler import profile
+from helpers import device, sync_device, cleanup_memory
 
 device = get_device()
 
@@ -119,7 +120,7 @@ class TI2VidTwoStagesPipeline:
         v_context_n, a_context_n = context_n
         print("end text encoder", time.time() - startAt)
 
-        torch.cuda.synchronize()
+        helpers.sync_device()
         del text_encoder
         cleanup_memory()
         print("Stage 1: Initial low resolution video generation.", time.time() - startAt)
@@ -174,7 +175,7 @@ class TI2VidTwoStagesPipeline:
             device=self.device,
         )
         print("Stage 1: End denoising loop.", time.time() - startAt)
-        torch.cuda.synchronize()
+        helpers.sync_device()
         del transformer
         cleanup_memory()
 
@@ -187,7 +188,7 @@ class TI2VidTwoStagesPipeline:
         )
         print("Stage 2: Upsample and refine the video end.", time.time() - startAt)
 
-        torch.cuda.synchronize()
+        helpers.sync_device()
         cleanup_memory()
 
         transformer = self.stage_2_model_ledger.transformer()
@@ -232,7 +233,7 @@ class TI2VidTwoStagesPipeline:
             initial_audio_latent=audio_state.latent,
         )
         print("Stage 2: Upsample and refine the video end.", time.time() - startAt)
-        torch.cuda.synchronize()
+        helpers.sync_device()
         del transformer
         del video_encoder
         cleanup_memory()
@@ -325,7 +326,7 @@ class TI2VidTwoStagesPipeline:
             print(f"Saving embeddings to {cache_path}")
             torch.save((context_p, context_n), cache_path)
 
-            torch.cuda.synchronize()
+            helpers.sync_device()
             del text_encoder
             cleanup_memory()
         # --- DISK CACHE LOGIC END ---
@@ -386,7 +387,7 @@ class TI2VidTwoStagesPipeline:
             device=self.device,
         )
         print("Stage 1: End denoising loop.", time.time() - startAt)
-        #torch.cuda.synchronize()
+        #helpers.sync_device()
         del transformer
         cleanup_memory()
 
@@ -399,7 +400,7 @@ class TI2VidTwoStagesPipeline:
         )
         print("Stage 2: Upsample and refine the video end.", time.time() - startAt)
 
-        #torch.cuda.synchronize()
+        #helpers.sync_device()
         cleanup_memory()
 
         transformer = self.stage_2_model_ledger.transformer()
@@ -444,7 +445,7 @@ class TI2VidTwoStagesPipeline:
             initial_audio_latent=audio_state.latent,
         )
         print("Stage 2: Upsample and refine the video end.", time.time() - startAt)
-        #torch.cuda.synchronize()
+        #helpers.sync_device()
         del transformer
         del video_encoder
         cleanup_memory()

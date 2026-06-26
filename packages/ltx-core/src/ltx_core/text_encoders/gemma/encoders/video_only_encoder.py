@@ -12,6 +12,7 @@ from ltx_core.text_encoders.gemma.embeddings_connector import (
 from ltx_core.text_encoders.gemma.encoders.base_encoder import GemmaTextEncoderModelBase
 from ltx_core.text_encoders.gemma.feature_extractor import GemmaFeaturesExtractorProjLinear
 from ltx_core.text_encoders.gemma.tokenizer import LTXVGemmaTokenizer
+from helpers import device, sync_device, cleanup_memory
 
 
 class VideoGemmaEncoderOutput(NamedTuple):

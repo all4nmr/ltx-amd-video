@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import Callable, List, NamedTuple, Tuple
 
 import torch
+from helpers import device, sync_device, cleanup_memory
 
 
 def compute_trapezoidal_mask_1d(

@@ -39,6 +39,7 @@ from ltx_pipelines.utils.helpers import (
 )
 from ltx_pipelines.utils.media_io import encode_video
 from ltx_pipelines.utils.types import PipelineComponents
+from helpers import device, sync_device, cleanup_memory
 
 device = get_device()
 
@@ -206,7 +207,7 @@ class MusicToVideoPipeline:
             torch.save(context_p, cache_path)
             print("Prompt encoded.", time.time() - startAt)
 
-            torch.cuda.synchronize()
+            helpers.sync_device()
             del text_encoder
             cleanup_memory()
         
@@ -271,7 +272,7 @@ class MusicToVideoPipeline:
                 dtype=dtype,
                 device=self.device,
             )
-            torch.cuda.synchronize()
+            helpers.sync_device()
             del video_encoder
             cleanup_memory()
 
@@ -335,7 +336,7 @@ class MusicToVideoPipeline:
         
         print("Stage 1: Finish denoising loop.", time.time() - startAt)
         
-        torch.cuda.synchronize()
+        helpers.sync_device()
         del stage_1_sigmas
         del stage_1_output_shape
         del stage_1_conditionings
@@ -344,7 +345,7 @@ class MusicToVideoPipeline:
         if save_step_1_preview:
             video_decoder = self.model_ledger.video_decoder()
             decoded_video = vae_decode_video(video_state.latent, video_decoder, tiling_config)
-            torch.cuda.synchronize()
+            helpers.sync_device()
             del video_decoder
             cleanup_memory()
             
@@ -354,7 +355,7 @@ class MusicToVideoPipeline:
                 decoded_audio = vae_decode_audio(
                     audio_state.latent, self.model_ledger.audio_decoder(), vocoder
                 )
-                torch.cuda.synchronize()
+                helpers.sync_device()
                 del vocoder
                 cleanup_memory()
             
@@ -388,7 +389,7 @@ class MusicToVideoPipeline:
                 device=self.device,
             )
 
-        torch.cuda.synchronize()
+        helpers.sync_device()
         del video_encoder
         del upsampler
         del video_state
@@ -412,7 +413,7 @@ class MusicToVideoPipeline:
         
         print("Stage 2: Finish upsample.", time.time() - startAt)
         
-        torch.cuda.synchronize()
+        helpers.sync_device()
         del transformer
         del stage_2_output_shape
         del stage_2_conditionings
@@ -433,7 +434,7 @@ class MusicToVideoPipeline:
             if audio_latents is not None:
                  vocoder = self.model_ledger.vocoder()
                  audio = vae_decode_audio(audio_latents, self.model_ledger.audio_decoder(), vocoder)
-                 torch.cuda.synchronize()
+                 helpers.sync_device()
                  del vocoder
                  cleanup_memory()
             else:

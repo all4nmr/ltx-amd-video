@@ -45,6 +45,7 @@ from rich.progress import (
 from transformers.utils.logging import disable_progress_bar
 
 from ltx_trainer.captioning import CaptionerType, MediaCaptioningModel, create_captioner
+from helpers import device, sync_device, cleanup_memory
 
 VIDEO_EXTENSIONS = ["mp4", "avi", "mov", "mkv", "webm"]
 IMAGE_EXTENSIONS = ["jpg", "jpeg", "png"]
@@ -425,7 +426,7 @@ def main(  # noqa: PLR0913
     """
 
     # Determine device for local models
-    device_str = device or ("cuda" if torch.cuda.is_available() else "cpu")
+    device_str = device or ("cuda" if helpers.is_directml(getattr(helpers, 'device', None)) or torch.cuda.is_available() else "cpu")
 
     # Parse extensions
     ext_list = [ext.strip() for ext in extensions.split(",")]

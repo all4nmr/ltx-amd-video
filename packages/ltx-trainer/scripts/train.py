@@ -20,6 +20,7 @@ from rich.console import Console
 
 from ltx_trainer.config import LtxTrainerConfig
 from ltx_trainer.trainer import LtxvTrainer
+from helpers import device, sync_device, cleanup_memory
 
 console = Console()
 app = typer.Typer(

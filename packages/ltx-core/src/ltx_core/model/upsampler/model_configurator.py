@@ -1,5 +1,6 @@
 from ltx_core.model.model_protocol import ModelConfigurator
 from ltx_core.model.upsampler.model import LatentUpsampler
+from helpers import device, sync_device, cleanup_memory
 
 
 class LatentUpsamplerConfigurator(ModelConfigurator[LatentUpsampler]):

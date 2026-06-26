@@ -1,4 +1,5 @@
 from enum import Enum
+from helpers import device, sync_device, cleanup_memory
 
 
 class NormLayerType(Enum):

@@ -41,6 +41,7 @@ from ltx_trainer.training_strategies import get_training_strategy
 from ltx_trainer.utils import get_gpu_memory_gb, open_image_as_srgb, save_image
 from ltx_trainer.validation_sampler import CachedPromptEmbeddings, GenerationConfig, ValidationSampler
 from ltx_trainer.video_utils import read_video, save_video
+from helpers import device, sync_device, cleanup_memory
 
 # Disable irrelevant warnings from transformers
 os.environ["TOKENIZERS_PARALLELISM"] = "true"
@@ -378,7 +379,7 @@ class LtxvTrainer:
         self._text_encoder.model = None
         self._text_encoder.tokenizer = None
         self._text_encoder.feature_extractor_linear = None
-        torch.cuda.empty_cache()
+        helpers.cleanup_memory()
 
         logger.debug("Validation prompt embeddings cached. Gemma model unloaded")
         return cached_embeddings
@@ -734,7 +735,7 @@ class LtxvTrainer:
         # Free up GPU memory before validation sampling.
         # Zero gradients and empty the cache to reclaim memory.
         self._optimizer.zero_grad(set_to_none=True)
-        torch.cuda.empty_cache()
+        helpers.cleanup_memory()
 
         # Start sampling progress tracking
         sampling_ctx = progress.start_sampling(
@@ -832,7 +833,7 @@ class LtxvTrainer:
         sampling_ctx.cleanup()
 
         # Clear GPU cache after validation
-        torch.cuda.empty_cache()
+        helpers.cleanup_memory()
 
         rel_outputs_path = output_dir.relative_to(self._config.output_dir)
         logger.info(f"🎥 Validation samples for step {self._global_step} saved in {rel_outputs_path}")

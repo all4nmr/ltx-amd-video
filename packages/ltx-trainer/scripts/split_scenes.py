@@ -37,6 +37,7 @@ from scenedetect.scene_manager import SceneDetector, write_scene_list_html
 from scenedetect.scene_manager import save_images as save_scene_images
 from scenedetect.stats_manager import StatsManager
 from scenedetect.video_splitter import split_video_ffmpeg
+from helpers import device, sync_device, cleanup_memory
 
 app = typer.Typer(no_args_is_help=True, help="Split video into scenes using PySceneDetect.")
 

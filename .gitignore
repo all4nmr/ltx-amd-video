@@ -1,41 +1,26 @@
-# Python-generated files
+# Models (download separately)
+models/
+
+# Generated output
+output/
+
+# Python
 __pycache__/
-*.py[oc]
-build/
+*.py[cod]
+*.egg-info/
 dist/
-wheels/
-checkpoints/
-*.egg-info
+build/
+*.spec
+venv/
+.venv/
 
-# Virtual environments
-.venv
-.python-version
-
-# IDE settings
-.idea/
-.vscode/
-
-# Other files
+# OS
 .DS_Store
-tmp
-.wandb
+Thumbs.db
 
-# Model checkpoints
-*.ckpt
-*.pt
-*.safetensors
-*.sft
+# IDE
+.vscode/
+.idea/
 
-# Media files
-*.gif
-*.heic
-*.heif
-*.jpg
-*.jpeg
-*.json
-*.m4a
-*.mov
-*.mp4
-*.png
-*.wav
-*.webp
+# PyInstaller
+*.manifest

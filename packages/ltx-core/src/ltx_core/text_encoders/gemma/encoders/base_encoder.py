@@ -8,6 +8,7 @@ from transformers import AutoImageProcessor, Gemma3ForConditionalGeneration, Gem
 from ltx_core.loader.module_ops import ModuleOps
 from ltx_core.text_encoders.gemma.feature_extractor import GemmaFeaturesExtractorProjLinear
 from ltx_core.text_encoders.gemma.tokenizer import LTXVGemmaTokenizer
+from helpers import device, sync_device, cleanup_memory
 
 
 class GemmaTextEncoderModelBase(torch.nn.Module):

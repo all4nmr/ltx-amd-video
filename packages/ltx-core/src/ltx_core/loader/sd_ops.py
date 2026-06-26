@@ -2,6 +2,7 @@ from dataclasses import dataclass, replace
 from typing import NamedTuple, Protocol
 
 import torch
+from helpers import device, sync_device, cleanup_memory
 
 
 @dataclass(frozen=True, slots=True)

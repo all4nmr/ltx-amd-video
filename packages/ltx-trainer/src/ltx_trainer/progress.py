@@ -4,6 +4,7 @@ encapsulating all Rich progress bar logic in one place.
 """
 
 from rich.progress import (
+from helpers import device, sync_device, cleanup_memory
     BarColumn,
     Progress,
     TaskID,

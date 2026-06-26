@@ -39,6 +39,7 @@ from ltx_pipelines.utils.helpers import (
 )
 from ltx_pipelines.utils.media_io import encode_video
 from ltx_pipelines.utils.types import PipelineComponents
+from helpers import device, sync_device, cleanup_memory
 
 device = get_device()
 
@@ -230,7 +231,7 @@ class MusicToVideoTwoStagesPipeline:
             print(f"Saving embeddings to {cache_path}")
             torch.save((context_p, context_n), cache_path)
 
-            torch.cuda.synchronize()
+            helpers.sync_device()
             del text_encoder
             cleanup_memory()
         # --- DISK CACHE LOGIC END ---

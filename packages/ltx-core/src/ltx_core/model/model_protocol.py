@@ -1,4 +1,5 @@
 from typing import Protocol, TypeVar
+from helpers import device, sync_device, cleanup_memory
 
 ModelType = TypeVar("ModelType")
 
