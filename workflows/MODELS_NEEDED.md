@@ -35,11 +35,9 @@
 | 항목 | 내용 |
 |------|------|
 | **파일명** | `ltx-2.3_text_projection_bf16.safetensors` |
-| **크기** | ~0.2 GB |
+| **크기** | **2.31 GB** |
 | **저장 위치** | `ComfyUI/models/text_encoders/` |
-| **다운로드** | [HuggingFace - unsloth/LTX-2.3-GGUF](https://huggingface.co/unsloth/LTX-2.3-GGUF/resolve/main/text_encoders/ltx-2.3-22b-distilled_embeddings_connectors.safetensors?download=true) |
-
-> **참고:** 저장 시 `ltx-2.3_text_projection_bf16.safetensors` 이름으로 저장하세요.
+| **다운로드** | [HuggingFace - Kijai/LTX2.3_comfy](https://huggingface.co/Kijai/LTX2.3_comfy/resolve/main/text_encoders/ltx-2.3_text_projection_bf16.safetensors?download=true) |
 
 ---
 
