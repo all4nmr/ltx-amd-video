@@ -19,25 +19,18 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install Rust (for tokenizers)
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
-          pip install torch-directml
+          pip install --extra-index-url https://download.pytorch.org/whl/cpu torch-directml
           pip install -e packages/ltx-pipelines
           pip install -e packages/ltx-core
           pip install pyinstaller
-          pip install gradio tk
 
       - name: Build EXE with PyInstaller
         run: |
           pyinstaller --onefile --windowed `
-            --add-data "models;models" `
             --add-data "packages;packages" `
             --hidden-import torch_directml `
             --name "LTX-AmD-Video" `

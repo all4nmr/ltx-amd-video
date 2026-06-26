@@ -177,6 +177,14 @@ class GenWorker(threading.Thread):
                     cmd += ["--prompt", self.config["prompt"]]
                 if self.config.get("image_path"):
                     cmd += ["--image", self.config["image_path"]]
+                if self.config.get("lipdub_enabled") and self.config.get("driving_audio"):
+                    lora_path = os.path.join(
+                        self.config.get("models_dir", "."),
+                        "loras",
+                        "ltx-2.3-22b-ic-lora-lipdub-0.9.safetensors",
+                    )
+                    cmd += ["--lora", lora_path]
+                    cmd += ["--audio", self.config["driving_audio"]]
 
                 result = subprocess.run(cmd, capture_output=True, text=True)
                 if result.returncode != 0:
@@ -263,6 +271,26 @@ class RoosterGUI:
         )
         ttk.Button(model_frame, text="Browse...",
                    command=self._browse_image).grid(row=1, column=2, pady=(5, 0))
+
+        # ── LipDub LoRA (Lip-Sync) ──
+        lora_frame = ttk.LabelFrame(self.root, text="Lip-Sync LoRA (LipDub)", padding=10)
+        lora_frame.pack(fill="x", padx=10, pady=5)
+
+        self.lipdub_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(lora_frame, text="Enable LipDub (face + lip-sync)",
+                        variable=self.lipdub_var,
+                        command=self._toggle_lipdub).grid(row=0, column=0, columnspan=3, sticky="w")
+
+        ttk.Label(lora_frame, text="Driving audio (WAV/MP3):").grid(
+            row=1, column=0, sticky="w", pady=(5, 0)
+        )
+        self.audio_path_var = tk.StringVar(value="")
+        self.audio_entry = ttk.Entry(lora_frame, textvariable=self.audio_path_var, width=50)
+        self.audio_entry.grid(row=1, column=1, padx=5, pady=(5, 0))
+        self.audio_browse_btn = ttk.Button(lora_frame, text="Browse...",
+                                           command=self._browse_audio)
+        self.audio_browse_btn.grid(row=1, column=2, pady=(5, 0))
+        self._toggle_lipdub()  # set initial state
 
         # ── Output Path ──
         out_frame = ttk.LabelFrame(self.root, text="Output", padding=10)
@@ -356,6 +384,19 @@ class RoosterGUI:
         if path:
             self.image_path_var.set(path)
 
+    def _browse_audio(self):
+        path = filedialog.askopenfilename(
+            title="Select driving audio for lip-sync",
+            filetypes=[("Audio files", "*.wav *.mp3 *.m4a *.ogg")]
+        )
+        if path:
+            self.audio_path_var.set(path)
+
+    def _toggle_lipdub(self):
+        state = "normal" if self.lipdub_var.get() else "disabled"
+        self.audio_entry.config(state=state)
+        self.audio_browse_btn.config(state=state)
+
     def _browse_output(self):
         path = filedialog.askdirectory(title="Select output folder")
         if path:
@@ -380,6 +421,8 @@ class RoosterGUI:
             "prompt": self.prompt_text.get("1.0", "end-1c").strip(),
             "duration_seconds": self.duration_var.get(),
             "max_segment_seconds": self.segment_var.get(),
+            "lipdub_enabled": self.lipdub_var.get(),
+            "driving_audio": self.audio_path_var.get(),
         }
 
         self._worker = GenWorker(
