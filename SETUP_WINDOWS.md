@@ -69,11 +69,12 @@ Create a `models\` folder and download:
 
 | File | Source | Size |
 |------|--------|------|
-| `ltx-2.3-22b-dev.safetensors` | [Lightricks/LTX-2.3](https://huggingface.co/Lightricks/LTX-2.3) | ~22 GB (FP8: ~12 GB) |
+| `ltx-2.3-22b-dev.safetensors` | [Lightricks/LTX-2.3](https://huggingface.co/Lightricks/LTX-2.3) | ~43 GB (bf16 full) |
+| `ltx-2.3-22b-distilled.safetensors` | [Lightricks/LTX-2.3 distilled](https://huggingface.co/Lightricks/LTX-2.3/resolve/main/ltx-2.3-22b-distilled.safetensors) | ~43 GB (bf16 distilled) |
 | `ltx-2.3-spatial-upscaler-x2-1.0.safetensors` | [Lightricks/LTX-2.3](https://huggingface.co/Lightricks/LTX-2.3) | ~1 GB |
 | Gemma 3 12B IT (FP4) | [Comfy-Org/ltx-2](https://huggingface.co/Comfy-Org/ltx-2/tree/main/split_files/text_encoders) | ~9.5 GB |
 
-> **8 GB VRAM tip:** Use the GGUF Q4 variant (ltx-2-19b-distilled_Q4_K_M.gguf, ~12 GB on disk but only ~5 GB VRAM at inference).
+> **8 GB VRAM tip:** Use the **GGUF quantized** variant. Q4_K_M of the distilled model is ~15 GB on disk but uses ~5-6 GB VRAM at inference. 22B model needs ~15 GB VRAM even with Q4 — for 8 GB card, the 19B distilled+Q4 is more realistic.
 
 ### Step 7 — Apply DirectML Patches
 
