@@ -41,22 +41,31 @@ RESOLUTIONS = [
 MAX_FRAMES_SAFE = 257  # 10s @ 25fps
 
 
-# ── Segment Manager (30s splitting + stitching) ────────────────────────────
+# ── Segment Manager (configurable splitting + stitching) ────────────────────
 
 class SegmentManager:
-    """Handles splitting long videos into 30s segments and stitching results."""
-
-    MAX_SEGMENT_FRAMES = 257  # ~10s @ 25fps — well under 30s
+    """Handles splitting long videos into segments and stitching results."""
 
     @staticmethod
-    def split(total_seconds: int, fps: int = 25) -> list[dict]:
-        """Return list of segment configs: {start_frame, num_frames, segment_index}."""
+    def split(total_seconds: int, fps: int = 25,
+              max_segment_seconds: int = 15) -> list[dict]:
+        """Return list of segment configs.
+
+        Args:
+            total_seconds: Total video duration in seconds.
+            fps: Frames per second.
+            max_segment_seconds: Max duration per segment (15-30s).
+
+        Returns:
+            List of dicts: {start_frame, num_frames, segment_index}.
+        """
         total_frames = total_seconds * fps
+        max_frames = max_segment_seconds * fps
         segments = []
         pos = 0
         idx = 0
         while pos < total_frames:
-            n = min(SegmentManager.MAX_SEGMENT_FRAMES, total_frames - pos)
+            n = min(max_frames, total_frames - pos)
             segments.append({
                 "start_frame": pos,
                 "num_frames": n,
@@ -127,13 +136,14 @@ class GenWorker(threading.Thread):
             # Determine total duration (from config or default)
             total_seconds = self.config.get("duration_seconds", 10)
             fps = self.config.get("fps", 25)
+            max_seg_sec = self.config.get("max_segment_seconds", 15)
 
             if self._cancel.is_set():
                 self.callback(None, "Cancelled")
                 return
 
             # Split into segments
-            segments = SegmentManager.split(total_seconds, fps)
+            segments = SegmentManager.split(total_seconds, fps, max_seg_sec)
             self.progress_callback(f"Split into {len(segments)} segment(s)", 5)
 
             output_dir = Path(self.config.get("output_dir", DEFAULT_OUTPUT_DIR))
@@ -284,6 +294,15 @@ class RoosterGUI:
         ttk.Spinbox(gen_frame, from_=1, to=120, textvariable=self.duration_var,
                     width=10).grid(row=1, column=1, padx=5, pady=(5, 0), sticky="w")
 
+        ttk.Label(gen_frame, text="Segment length (sec):").grid(
+            row=2, column=0, sticky="w", pady=(5, 0)
+        )
+        self.segment_var = tk.IntVar(value=15)
+        ttk.Spinbox(gen_frame, from_=15, to=30, textvariable=self.segment_var,
+                    width=10).grid(row=2, column=1, padx=5, pady=(5, 0), sticky="w")
+        ttk.Label(gen_frame, text="15-30s (shorter = more stable, longer = fewer segments)",
+                  font=("Segoe UI", 8)).grid(row=2, column=2, padx=5, pady=(5, 0), sticky="w")
+
         # ── Prompt ──
         prompt_frame = ttk.LabelFrame(self.root, text="Prompt", padding=10)
         prompt_frame.pack(fill="both", expand=True, padx=10, pady=5)
@@ -360,6 +379,7 @@ class RoosterGUI:
             "image_path": self.image_path_var.get(),
             "prompt": self.prompt_text.get("1.0", "end-1c").strip(),
             "duration_seconds": self.duration_var.get(),
+            "max_segment_seconds": self.segment_var.get(),
         }
 
         self._worker = GenWorker(
