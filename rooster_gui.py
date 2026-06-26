@@ -177,14 +177,22 @@ class GenWorker(threading.Thread):
                     cmd += ["--prompt", self.config["prompt"]]
                 if self.config.get("image_path"):
                     cmd += ["--image", self.config["image_path"]]
-                if self.config.get("lipdub_enabled") and self.config.get("driving_audio"):
-                    lora_path = os.path.join(
-                        self.config.get("models_dir", "."),
-                        "loras",
-                        "ltx-2.3-22b-ic-lora-lipdub-0.9.safetensors",
+                if self.config.get("lipdub_enabled"):
+                    lora_dir = os.path.join(
+                        self.config.get("models_dir", "."), "loras"
                     )
+                    # Try AV-LoRA first (elix3r), fall back to official LipDub
+                    av_lora = os.path.join(lora_dir, "LTX-2.3-22b-AV-LoRA-talking-head-v1.safetensors")
+                    lipdub_lora = os.path.join(lora_dir, "ltx-2.3-22b-ic-lora-lipdub-0.9.safetensors")
+                    if os.path.exists(av_lora):
+                        lora_path = av_lora
+                    elif os.path.exists(lipdub_lora):
+                        lora_path = lipdub_lora
+                    else:
+                        lora_path = lipdub_lora  # will fail with helpful error
                     cmd += ["--lora", lora_path]
-                    cmd += ["--audio", self.config["driving_audio"]]
+                    if self.config.get("driving_audio"):
+                        cmd += ["--audio", self.config["driving_audio"]]
 
                 result = subprocess.run(cmd, capture_output=True, text=True)
                 if result.returncode != 0:
@@ -277,19 +285,23 @@ class RoosterGUI:
         lora_frame.pack(fill="x", padx=10, pady=5)
 
         self.lipdub_var = tk.BooleanVar(value=False)
-        ttk.Checkbutton(lora_frame, text="Enable LipDub (face + lip-sync)",
+        ttk.Checkbutton(lora_frame, text="Enable AV Talking-Head LoRA (auto-prepends OHWXPERSON to prompt)",
                         variable=self.lipdub_var,
                         command=self._toggle_lipdub).grid(row=0, column=0, columnspan=3, sticky="w")
 
-        ttk.Label(lora_frame, text="Driving audio (WAV/MP3):").grid(
-            row=1, column=0, sticky="w", pady=(5, 0)
+        ttk.Label(lora_frame, text="Settings: 1280x736, 24fps, CFG=1.0, LoRA strength=1.0").grid(
+            row=1, column=0, columnspan=3, sticky="w", pady=(2, 0)
+        )
+
+        ttk.Label(lora_frame, text="Driving audio (optional for AV-LoRA):").grid(
+            row=2, column=0, sticky="w", pady=(5, 0)
         )
         self.audio_path_var = tk.StringVar(value="")
         self.audio_entry = ttk.Entry(lora_frame, textvariable=self.audio_path_var, width=50)
-        self.audio_entry.grid(row=1, column=1, padx=5, pady=(5, 0))
+        self.audio_entry.grid(row=2, column=1, padx=5, pady=(5, 0))
         self.audio_browse_btn = ttk.Button(lora_frame, text="Browse...",
                                            command=self._browse_audio)
-        self.audio_browse_btn.grid(row=1, column=2, pady=(5, 0))
+        self.audio_browse_btn.grid(row=2, column=2, pady=(5, 0))
         self._toggle_lipdub()  # set initial state
 
         # ── Output Path ──
@@ -413,12 +425,17 @@ class RoosterGUI:
                 subprocess.run(["xdg-open", path])
 
     def _start_generation(self):
+        # Auto-prepend trigger word for AV talking-head LoRA
+        raw_prompt = self.prompt_text.get("1.0", "end-1c").strip()
+        if self.lipdub_var.get() and "OHWXPERSON" not in raw_prompt:
+            raw_prompt = "OHWXPERSON, " + raw_prompt
+
         config = {
             "device": self.device_var.get(),
             "models_dir": self.model_path_var.get(),
             "output_dir": self.output_path_var.get(),
             "image_path": self.image_path_var.get(),
-            "prompt": self.prompt_text.get("1.0", "end-1c").strip(),
+            "prompt": raw_prompt,
             "duration_seconds": self.duration_var.get(),
             "max_segment_seconds": self.segment_var.get(),
             "lipdub_enabled": self.lipdub_var.get(),
