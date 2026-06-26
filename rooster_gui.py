@@ -285,23 +285,31 @@ class RoosterGUI:
         lora_frame.pack(fill="x", padx=10, pady=5)
 
         self.lipdub_var = tk.BooleanVar(value=False)
-        ttk.Checkbutton(lora_frame, text="Enable AV Talking-Head LoRA (auto-prepends OHWXPERSON to prompt)",
+        ttk.Checkbutton(lora_frame, text="Enable AV Talking-Head LoRA (auto-formats prompt with transcript)",
                         variable=self.lipdub_var,
-                        command=self._toggle_lipdub).grid(row=0, column=0, columnspan=3, sticky="w")
+                        command=self._toggle_lipdub).pack(anchor="w")
 
-        ttk.Label(lora_frame, text="Settings: 1280x736, 24fps, CFG=1.0, LoRA strength=1.0").grid(
-            row=1, column=0, columnspan=3, sticky="w", pady=(2, 0)
+        ttk.Label(lora_frame, text="Settings: 1280x736, 24fps, CFG=1.0, LoRA strength=1.0").pack(
+            anchor="w", pady=(2, 0)
         )
 
-        ttk.Label(lora_frame, text="Driving audio (optional for AV-LoRA):").grid(
-            row=2, column=0, sticky="w", pady=(5, 0)
-        )
+        # Audio row
+        audio_row = ttk.Frame(lora_frame)
+        audio_row.pack(fill="x", pady=(5, 0))
+        ttk.Label(audio_row, text="Driving audio (optional for AV-LoRA):").pack(side="left")
         self.audio_path_var = tk.StringVar(value="")
-        self.audio_entry = ttk.Entry(lora_frame, textvariable=self.audio_path_var, width=50)
-        self.audio_entry.grid(row=2, column=1, padx=5, pady=(5, 0))
-        self.audio_browse_btn = ttk.Button(lora_frame, text="Browse...",
+        self.audio_entry = ttk.Entry(audio_row, textvariable=self.audio_path_var, width=50)
+        self.audio_entry.pack(side="left", padx=5)
+        self.audio_browse_btn = ttk.Button(audio_row, text="Browse...",
                                            command=self._browse_audio)
-        self.audio_browse_btn.grid(row=2, column=2, pady=(5, 0))
+        self.audio_browse_btn.pack(side="left")
+
+        # ── Transcription / Lyrics (hidden until AV-LoRA enabled) ──
+        self.transcript_frame = ttk.LabelFrame(lora_frame, text="Transcription / Lyrics", padding=5)
+        self.transcript_text = tk.Text(self.transcript_frame, height=3, font=("Segoe UI", 10))
+        self.transcript_text.pack(fill="both", expand=True)
+        self.transcript_text.insert("1.0", "Enter lyrics or speech transcript here...")
+
         self._toggle_lipdub()  # set initial state
 
         # ── Output Path ──
@@ -405,9 +413,15 @@ class RoosterGUI:
             self.audio_path_var.set(path)
 
     def _toggle_lipdub(self):
-        state = "normal" if self.lipdub_var.get() else "disabled"
+        enabled = self.lipdub_var.get()
+        state = "normal" if enabled else "disabled"
         self.audio_entry.config(state=state)
         self.audio_browse_btn.config(state=state)
+        if enabled:
+            if not self.transcript_frame.winfo_ismapped():
+                self.transcript_frame.pack(fill="x", pady=(5, 0))
+        else:
+            self.transcript_frame.pack_forget()
 
     def _browse_output(self):
         path = filedialog.askdirectory(title="Select output folder")
@@ -425,10 +439,24 @@ class RoosterGUI:
                 subprocess.run(["xdg-open", path])
 
     def _start_generation(self):
-        # Auto-prepend trigger word for AV talking-head LoRA
+        # Build prompt: AV-LoRA mode uses transcript format
         raw_prompt = self.prompt_text.get("1.0", "end-1c").strip()
-        if self.lipdub_var.get() and "OHWXPERSON" not in raw_prompt:
-            raw_prompt = "OHWXPERSON, " + raw_prompt
+        if self.lipdub_var.get():
+            transcript = self.transcript_text.get("1.0", "end-1c").strip()
+            if not transcript or transcript == "Enter lyrics or speech transcript here...":
+                messagebox.showwarning(
+                    "Transcription Required",
+                    "Transcription / Lyrics input is required for AV-LoRA.\n"
+                    "Please enter the speech transcript or lyrics."
+                )
+                return
+            # Build AV-LoRA prompt format:
+            # OHWXPERSON, [visual description]. The person is talking, and he says: "[transcript]"
+            visual_desc = raw_prompt if raw_prompt else "a person"
+            raw_prompt = (
+                f'OHWXPERSON, {visual_desc}. '
+                f'The person is talking, and he says: "{transcript}"'
+            )
 
         config = {
             "device": self.device_var.get(),
